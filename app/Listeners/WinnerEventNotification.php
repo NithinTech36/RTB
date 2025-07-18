@@ -24,6 +24,7 @@ class WinnerEventNotification
     {
         //
         dispatch(new SetWinnerJob($event->slotId))->afterCommit();
+        //new SetWinnerJob($event->slotId)::dispatch()->afterCommit();
 
     }
 }
