@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Events\WinnerEvent;
+use App\Listeners\WinnerEventNotification;
+use Event;
+use Illuminate\Support\ServiceProvider; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,8 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-       $this->app->alias('bugsnag.logger', \Illuminate\Contracts\Logging\Log::class);
-$this->app->alias('bugsnag.logger', \Psr\Log\LoggerInterface::class);
+          //Register any event
+        // You can register events here if needed
+        Event::listen(WinnerEvent::class,WinnerEventNotification::class); 
     }
 
     /**

@@ -26,16 +26,18 @@ class SetWinnerJob implements ShouldQueue
 
     /**
      * Execute the job.
-     */
+     */ 
     public function handle(): void
     {
-
-        $highestBid = Bids::where('slot_id', $this->slotId)->orderBy('amount', 'desc')->first();
-                $highestBidDatas = Bids::where('slot_id', $this->slotId)
-                   ->where('amount', $highestBid->amount)
-                   ->orderBy('id', 'asc')
-                   ->get();
-                   log('Highest bid data count: ' . $highestBidDatas->count());
+        try {
+            $highestBid = Bids::where('slot_id', $this->slotId)->orderBy('amount', 'desc')->first();
+            $highestBidDatas = Bids::where('slot_id', $this->slotId)
+                ->where('amount', $highestBid->amount)
+                ->orderBy('id', 'asc')
+                ->get();
+    
+                   Log::info('Highest bid data count: ' . $highestBidDatas->count());
+                  // Log:info('Highest bid data count: ' . $highestBidDatas->count());
                 if($highestBidDatas->count() >1) $highestBid = $highestBidDatas->first();
                 $savedSlot = Slots::find($this->slotId);
                 $savedSlot->update(['status' => 'awarded']);
@@ -61,6 +63,11 @@ class SetWinnerJob implements ShouldQueue
                    $slot->save();
                }
                    */
+
+                   } catch (\Exception $e) {
+            Log::error('Error occurred while setting winner: ' . $e->getMessage());
+                   }
+
 
     }
 }

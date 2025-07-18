@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Slots;
 use App\Models\Bids;
-use App\Jobs\SetWinnerJob;
+use App\Events\WinnerEvent;
 
 class SetWinner extends Command
 {
@@ -56,7 +56,8 @@ class SetWinner extends Command
                     $this->info("Slot {$slot->id} status updated to closed.");
                 }
             } elseif ($slot->status === 'closed') {
-                dispatch(new SetWinnerJob($slot->id));
+                event(new WinnerEvent($slot->id));
+              //   dispatch(new SetWinnerJob($slot->id))->afterCommit();
                 /*
                 $highestBid = $slot->bids()->orderBy('amount', 'desc')->first();
                 $highestBidDatas = Bids::where('slot_id', $slot->id)
