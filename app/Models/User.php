@@ -45,4 +45,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // Define relationships if needed
+    // For example, if you want to define a relationship with Bids:
+    public function bids()
+    {
+        return $this->hasMany(Bids::class, 'user_id');
+    }
 }

@@ -11,13 +11,15 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
+  
+    // For example, you can call the SlotSeeder to seed the slots table.
+
     public function run(): void
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Call the SlotSeeder to seed the slots table
+        $this->call(SlotSeeder::class);
+  
     }
 }
