@@ -14,7 +14,7 @@ class SetWinnerCommandTest extends TestCase
     /**
      * A basic feature test example.
      */
- // use RefreshDatabase;
+  use RefreshDatabase;
     public function testSetWinnerCommand()
     {
         //create slots and bids for testing
@@ -28,6 +28,10 @@ class SetWinnerCommandTest extends TestCase
         Bids::factory()->create(['slot_id' => $closedSlot->id, 'user_id' => $user->id, 'amount' => 300]);
         Bids::factory()->create(['slot_id' => $closedSlot->id, 'user_id' => $user->id, 'amount' => 400]);
         Bids::factory()->create(['slot_id' => $closedSlot->id, 'user_id' => $user->id, 'amount' => 400]);
+        // Run the artisan command to set the winner
+        $this->artisan('app:set-winner')->assertSuccessful();
+        // Run the artisan command to run the job
+        $this->artisan('queue:work --once')->assertSuccessful();
         $this->assertDatabaseHas('slots', [
             'id' => $closedSlot->id,
             'status' => 'awarded' // Assuming the highest bid is the winner

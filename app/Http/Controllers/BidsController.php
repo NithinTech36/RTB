@@ -58,4 +58,6 @@ class BidsController extends Controller
 
         return $message;
     }
+
+
 }

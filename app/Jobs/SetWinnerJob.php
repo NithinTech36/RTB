@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\BidWinner;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -9,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Models\Slots;
 use App\Models\Bids;
+
 use Illuminate\Support\Facades\Log;
 
 class SetWinnerJob implements ShouldQueue
@@ -35,34 +37,18 @@ class SetWinnerJob implements ShouldQueue
                 ->where('amount', $highestBid->amount)
                 ->orderBy('id', 'asc')
                 ->get();
-    
-                   Log::info('Highest bid data count: ' . $highestBidDatas->count());
-                  // Log:info('Highest bid data count: ' . $highestBidDatas->count());
+
                 if($highestBidDatas->count() >1) $highestBid = $highestBidDatas->first();
                 $savedSlot = Slots::find($this->slotId);
+           
                 $savedSlot->update(['status' => 'awarded']);
-/*
-               $slot = Slots::find($this->slotId)->load('bids');
-               $highestBid = $slot->bids()->orderBy('amount', 'desc')->first();
-               $highestBidCount = Bids::where('slot_id', $slot->id)
-                   ->where('amount', $highestBid->amount)
-                   ->count();
+                     BidWinner::create([
+                    'bid_id' => $highestBid->id,
+                    'slot_id' => $highestBid->slot_id,
+                    'user_id' => $highestBid->user_id,
+                    'amount' => $highestBid->amount,
+                ]);
 
-                   if($highestBidCount > 1) {
-                       Log::info('Multiple highest bids found for slot ID: ' . $slot->id);
-                       // Handle tie-breaking logic here if needed
-                   } else {
-                       Log::info('Single highest bid found for slot ID: ' . $slot->id);
-                   }
-
-               if ($highestBid) {
-                   $slot->status = 'awarded';    
-
-
-                 //  $slot->winner_id = $highestBid->user_id;
-                   $slot->save();
-               }
-                   */
 
                    } catch (\Exception $e) {
             Log::error('Error occurred while setting winner: ' . $e->getMessage());

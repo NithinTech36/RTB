@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Bids;
+use App\Models\BidWinner;
+
 
 class SlotsTest extends TestCase
 {
@@ -47,5 +50,32 @@ class SlotsTest extends TestCase
             'total',
         ]);
         $this->assertCount(10, $response->json('data'));
+    }
+
+    //Test to view winning bid for a slot
+    public function test_view_winning_bid()
+    {
+        $user = User::factory()->create();
+        $slot = Slots::factory()->create(['status' => 'awarded']);
+        $Bid = Bids::factory()->create(['slot_id' => $slot->id, 'user_id' => $user->id, 'amount' => 200.00]);
+        
+        $winningBid = $slot->bidWinners()->create([
+            'bid_id' => $Bid->id,
+            'user_id' => $user->id,
+            'amount' => 200.00,
+        ]);
+
+        $response = $this->actingAs($user)->getJson("/api/slots/{$slot->id}/bids");
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Winning bid retrieved successfully',
+            'data' => [
+                'id' => $winningBid->id,
+                'bid_id' => $winningBid->bid_id,
+                'user_id' => $winningBid->user_id,
+                'amount' => $winningBid->amount,
+            ],
+        ]);
     }
 }

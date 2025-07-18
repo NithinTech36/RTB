@@ -23,4 +23,20 @@ class SlotsController extends Controller
         $slots = $query->paginate(10); // Adjust the number of items per page as needed
         return response()->json($slots);
     }
+
+        public function viewWinningBid($slotId)
+    {
+        $slot = Slots::findOrFail($slotId);
+        if ($slot->first()->status !== 'awarded') {
+            return response()->json(['message' => 'No winning bid for this slot'], 404);
+        }
+
+        $winningBid = $slot->bidWinners()->with('bid.user')->first();
+        if (!$winningBid) {
+            return response()->json(['message' => 'No winning bid found'], 404);
+        }
+
+        return response()->json(['message' => 'Winning bid retrieved successfully', 'data' => $winningBid]);
+
+    }
 }

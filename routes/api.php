@@ -15,4 +15,6 @@ Route::get('/user/{userId}/bids', [UserController::class, 'userBidsHistory'])->m
 
 Route::get('/slots', [SlotsController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/bids', [BidsController::class, 'create'])->middleware('auth:sanctum');
+//view winning bid
+Route::get('/slots/{slotId}/bids', [SlotsController::class, 'viewWinningBid'])->middleware('auth:sanctum');
 Route::get('/bids/{slotId}', [BidsController::class, 'index'])->middleware('auth:sanctum');

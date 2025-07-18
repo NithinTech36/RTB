@@ -19,15 +19,14 @@ class SetWinnerJobTest extends TestCase
    //use RefreshDatabase;
     public function test_example(): void
     {
-        // This is a placeholder for the actual test logic.
-        // You would typically mock the SetWinnerJob and assert that it behaves as expected.
+
         $user = User::factory()->create();
         $slot = Slots::factory()->create(['status' => 'closed']);   
         $bid1 = Bids::factory()->create(['slot_id' => $slot->id, 'user_id' => $user->id, 'amount' => 150]);
         $bid2 = Bids::factory()->create(['slot_id' => $slot->id, 'user_id' => $user->id, 'amount' => 200]);
         dispatch(new SetWinnerJob($slot->id))->afterCommit();
-        //print the response in the console
-        //cls
+         $this->artisan('queue:work --once')->assertSuccessful();
+       
         $this->assertDatabaseHas('slots', [
             'id' => $slot->id,
             'status' => 'awarded' // Assuming the highest bid is the winner

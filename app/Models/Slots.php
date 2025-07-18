@@ -24,4 +24,8 @@ class Slots extends Model
     {
         return $this->hasMany(Bids::class, 'slot_id');
     }
+    public function bidWinners()
+    {
+        return $this->hasMany(BidWinner::class, 'slot_id');
+    }
 }
