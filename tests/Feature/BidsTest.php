@@ -23,8 +23,6 @@ class BidsTest extends TestCase
             'slot_id' => $slot->id,
             'amount' => 100,
         ]);
-        //print the json response
-        $response->dump();
 
         $response->assertStatus(201);
         $response->assertJsonStructure([

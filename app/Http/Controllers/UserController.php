@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -12,44 +14,83 @@ class UserController extends Controller
     public function create(Request $request)
     {
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-        $user = User::create($request->all());
+        try {
+                $validator =  Validator::make($request->all(), [
+                        'name' => 'required|string|max:255',
+                        'email' => 'required|string|email|max:255|unique:users',
+                        'password' => 'required|string|min:8|confirmed',
+                    ]);
+                    if ($validator->fails()) {
+                        return $this->sendError('Validation failed', $validator->errors(), 422);
+                    
+                    }
+                    $request->merge(['password' => bcrypt($request->password)]); // Hash the password
+                    
+                    $user = User::create($request->all());
+                    return $this->sendResponse( 'User created successfully',$user);
+        } catch (\Exception $e) {
+           return $this->sendError('Error creating user', ['error' => $e->getMessage()], 500);
+        }
 
-        return response()->json(['message' => 'User created successfully'], 201);
     }
  
     public function login(Request $request)
     {
-// Logic to handle user login
-        $credentials = $request->only('email', 'password');
-        // validate the credentials
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-        if (auth()->attempt($credentials)) {
-            return response()->json(['message' => 'User logged in successfully']);
+       try{
+            $credentials = $request->only('email', 'password');
+            // validate the credentials
+          $validator =  Validator::make($request->all(), [
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                $this->sendError('Validation failed', $validator->errors(), 422);
+               // return response()->json(['message' => 'Validation failed', 'data'=>[], 'errors' => [$validator->errors()]], 422);
+            }
+
+            if (auth()->attempt($credentials)) {
+
+                $token = auth()->user()->createToken(auth()->user()->name)->plainTextToken;
+                return $this->sendResponse('User logged in successfully', ['token' => $token]);
+            }
+            return $this->sendError('Invalid credentials', [], 401);
+        } catch (\Exception $e) {
+            return $this->sendError('Error logging in', ['error' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Invalid credentials'], 401);
+
     }
     //user logout
     public function logout(Request $request)
     {
 
-        auth()->logout();
-        return response()->json(['message' => 'User logged out successfully', 'data' => []]);
+       try {
+            auth()->logout();
+            return $this->sendResponse('User logged out successfully');
+
+       } catch (\Exception $e) {
+           return $this->sendError('Error logging out', ['error' => $e->getMessage()], 500);
+       }
+
+
     }
     //list all bids history under the user
     public function userBidsHistory(Request $request,$userId){
+        try {
+            $validator = Validator::make(['userId' => $userId], [
+                'userId' => 'required|integer|exists:users,id',
+            ]);
+            if ($validator->fails()) {
+                return $this->sendError('Validation failed', $validator->errors(), 422);
+            }
         $user = User::findOrFail($userId);
         $bids = $user->bids()->with('slot')->get();
       //  $data = $user->only(['id', 'name', 'email'])->merge(['bids' => $bids])->toArray();
 
-        return response()->json(['message' => 'Bids retrieved successfully', 'data' => $bids]);
+        return $this->sendResponse('Bids retrieved successfully', $bids);
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving bids', ['error' => $e->getMessage()], 500);
+        }
     }
 
 }

@@ -10,11 +10,15 @@ use App\Http\Controllers\BidsController;
 Route::post('/user/create', [UserController::class, 'create']);
 Route::post('/user/login',  [UserController::class, 'login']);
 Route::post('/user/logout', [UserController::class, 'logout']);
-Route::get('/user/{userId}/bids', [UserController::class, 'userBidsHistory'])->middleware('auth:sanctum');
-// List all slots with pagination using authenticated user
 
-Route::get('/slots', [SlotsController::class, 'index'])->middleware('auth:sanctum');
-Route::post('/bids', [BidsController::class, 'create'])->middleware('auth:sanctum');
-//view winning bid
-Route::get('/slots/{slotId}/bids', [SlotsController::class, 'viewWinningBid'])->middleware('auth:sanctum');
-Route::get('/bids/{slotId}', [BidsController::class, 'index'])->middleware('auth:sanctum');
+// group routes for authenticated users
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/{userId}/bids', [UserController::class, 'userBidsHistory']);
+    //group routes for slots and bids
+    Route::get('/slots', [SlotsController::class, 'index']);
+    Route::get('/slots/{slotId}/bids', [SlotsController::class, 'viewWinningBid']);
+    Route::get('/bids/{slotId}', [BidsController::class, 'index']);
+    Route::post('/bids', [BidsController::class, 'create']);
+
+});
+

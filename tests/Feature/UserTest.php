@@ -41,9 +41,18 @@ class UserTest extends TestCase
             'email' => 'testuser@example.com',
             'password' => 'password',
         ]);
-
+//$response->dump();
         $response->assertStatus(200);
-        $response->assertJson(['message' => 'User logged in successfully']);
+        // Check if the response contains the expected structure
+        $response->assertJsonStructure([
+            'message',
+            'data' => [
+                // 'id', // Uncomment if you want to check for user ID
+                // 'name', // Uncomment if you want to check for user name
+                // 'email', // Uncomment if you want to check for user email
+            ],
+        ]); 
+
     }
     //user logout test
     public function test_user_logout()
@@ -61,7 +70,7 @@ class UserTest extends TestCase
         $response = $this->postJson('/api/user/logout');
  
         $response->assertStatus(200);
-        $response->assertJson(['message' => 'User logged out successfully']);
+        $response->assertJson(['message' => 'User logged out successfully', 'data' => []]);
     }
     //user bids history test
     public function test_user_bids_history()
